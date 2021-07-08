@@ -1,11 +1,11 @@
 ---
 title: "In-class Lab 3"
 author: "ECON 4223 (Prof. Tyler Ransom, U of Oklahoma)"
-date: "August 30, 2018"
+date: "February 4, 2021"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
   word_document: default
 bibliography: biblio.bib
 ---
@@ -14,12 +14,13 @@ bibliography: biblio.bib
 knitr::opts_chunk$set(echo = TRUE, results = 'hide', fig.keep = 'none')
 ```
 
-The purpose of this in-class lab is to practice running regressions, computing regression formulas, visualizing the Sample Regression Function, using non-linear transformations, and interpreting coefficients. The lab should be completed in your group. To get credit, upload your .R script to the appropriate place on Canvas. 
+The purpose of this in-class lab is to practice running regressions, computing regression formulas, visualizing the Sample Regression Function, using non-linear transformations, and interpreting coefficients. You may complete this lab as a group, but please turn in separate copies for each group member. To get credit, upload your .R script to the appropriate place on Canvas. 
 
 ## For starters
 Open up a new R script (named `ICL3_XYZ.R`, where `XYZ` are your initials) and add the usual "preamble" to the top:
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
 library(tidyverse)
+library(modelsummary)
 library(broom)
 library(wooldridge)
 ```
@@ -78,6 +79,7 @@ Now estimate your model again and re-do the visualization:
 est <- lm(math10 ~ logexpend, data=df)
 tidy(est)
 glance(est)
+modelsummary(est)
 
 ggplot(df,aes(logexpend,math10)) +
     geom_point() +
@@ -94,13 +96,13 @@ H_0: \beta_1 = 0, \\
 H_a: \beta_1 \neq 0
 \]
 
-Does 
+Does increased school spending significantly increase the math test pass rate?
 
 ## Computing standard errors by hand
 If you have extra time, try computing the standard error formulas by hand, according to the formulas in the text book. To do so, we need to compute the following formulas: `sig` (the standard deviation of $u$), `n` (our regression's sample size), `SSTx` ($N-1$ times the variance of `logexpend`), and the sum of the squares of `logexpend`:
 ```{r}
-sig <- glance(est)$sigma
 n <- dim(df)[1]
+sig <- sqrt( sum (est$residuals^2) /(n-2) ) # or, more simply, glance(est)$sigma
 SSTx <- (n-1)*var(df$logexpend)
 sumx2 <- sum(df$logexpend^2)
 ```

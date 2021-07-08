@@ -1,11 +1,11 @@
 ---
 title: "In-Class Lab 8"
 author: "ECON 4223 (Prof. Tyler Ransom, U of Oklahoma)"
-date: "September 18, 2018"
+date: "February 25, 2021"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
   word_document: default
 bibliography: biblio.bib
 ---
@@ -14,7 +14,7 @@ bibliography: biblio.bib
 knitr::opts_chunk$set(echo = TRUE, results = 'hide', fig.keep = 'none')
 ```
 
-The purpose of this in-class lab is to practice conducting ***joint*** hypothesis tests of regression parameters in R. We will do this using t-tests and F-tests. The lab should be completed in your group. To get credit, upload your .R script to the appropriate place on Canvas. 
+The purpose of this in-class lab is to practice conducting ***joint*** hypothesis tests of regression parameters in R. We will do this using t-tests and F-tests. The lab may be completed in your group, but each group member should submit their own copy. To get credit, upload your .R script to the appropriate place on Canvas. 
 
 ## For starters
 Open up a new R script (named `ICL8_XYZ.R`, where `XYZ` are your initials) and add the usual "preamble" to the top:
@@ -25,6 +25,7 @@ library(broom)
 library(wooldridge)
 library(car)
 library(magrittr)
+library(modelsummary)
 ```
 
 ### Load the data
@@ -35,7 +36,8 @@ df <- as_tibble(htv)
 
 Check out what's in the data by typing
 ```{r}
-glimpse(df)
+datasummary_df(df)
+datasummary_skim(df,histogram=FALSE)
 ```
 
 The main variables we're interested in are: wages, education, ability, parental education, and region of residence (`ne`, `nc`, `west`, and `south`).
@@ -62,6 +64,7 @@ df %<>% mutate(abilsq = abil^2)
 ```{r}
 est <- lm(educ ~ motheduc + fatheduc + abil + abilsq + region, data=df)
 tidy(est)
+modelsummary(est)
 ```
 ### t-test
 1. Test the hypothesis that $abil$ has a linear effect on $educ$.
@@ -78,13 +81,17 @@ The p-values from the previous regression might indicate that the three region d
 
 3. Test the hypothesis that they don't; i.e. test 
 \[
-H_0: \text{all region dummies}=0;
+H_0: \text{all region dummies}=0; \\
 H_a: \text{any region dummy}\neq 0
 \]
 
 The code to do this again comes from the `linearHypothesis()` function. The syntax is to encolose each component hypothesis in quotes and then surround them with `c()`, which is how R creates vectors.
 ```{r}
 linearHypothesis(est, c("regionNortheast=0", "regionSouth=0", "regionWest =0"))
+```
+or, more simply,
+```{r}
+linearHypothesis(est, matchCoefs(est,"region"))
 ```
 
 Alternatively, you can perform the F-test as follows (no need to put this in your R-script; I'm just showing you how to do it "by hand"):
